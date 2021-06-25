@@ -2,12 +2,15 @@ const express = require("express");
 const router = express.Router();
 const validate = require("./validation.js");
 
+// const { Contacts } = require("../../db/contactsModel");
+
 const {
   listContacts,
   getContactById,
   removeContact,
   addContact,
   updateContact,
+  updateStatusContact,
 } = require("../../model/index");
 
 router.get("/", async (req, res, next) => {
@@ -38,15 +41,9 @@ router.get("/:contactId", async (req, res, next) => {
 
 router.post("/", validate.createContact, async (req, res, next) => {
   try {
-    const data = await addContact(req.body);
-    if (!data) {
-      res.status(400);
-      res.json({
-        message: "missing required name field",
-      });
-    }
+    const newContact = await addContact(req.body);
     res.status(201);
-    res.json({ "contact added": data });
+    res.json({ "contact added": newContact });
   } catch (error) {
     next(error);
   }
@@ -83,5 +80,26 @@ router.patch("/:contactId", validate.updateContact, async (req, res, next) => {
     next({ message: "Not found" });
   }
 });
+
+router.patch(
+  "/:contactId/favorite",
+  validate.updateContactStatus,
+  async (req, res, next) => {
+    try {
+      const data = await updateStatusContact(req.params.contactId, req.body);
+      if (!data) {
+        res.status(400);
+        res.json({
+          message: `Contact with id: ${req.params.contactId} is not found`,
+        });
+      }
+
+      res.status(200);
+      res.json({ "contact updated": data });
+    } catch (error) {
+      next({ message: "Not found" });
+    }
+  }
+);
 
 module.exports = router;
