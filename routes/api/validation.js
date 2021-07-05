@@ -20,6 +20,19 @@ const schemaUpdateStatus = Joi.object({
   favorite: Joi.boolean().required(),
 });
 
+const schemaCreateUser = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string().min(6).required(),
+});
+
+// const schemaLoginUser = Joi.object({
+//   email: Joi.string().email().required(),
+//   password: Joi.string()
+//     .regex(/^\d{3}-\d{3}-\d{4}$/)
+//     .required(),
+//   token: Joi.string().required(),
+// });
+
 const validate = (schema, obj, next) => {
   const { error } = schema.validate(obj);
   if (error) {
@@ -43,3 +56,11 @@ module.exports.updateContact = (req, _res, next) => {
 module.exports.updateContactStatus = (req, _res, next) => {
   return validate(schemaUpdateStatus, req.body, next);
 };
+
+module.exports.user = (req, _res, next) => {
+  return validate(schemaCreateUser, req.body, next);
+};
+
+// module.exports.loginUser = (req, _res, next) => {
+//   return validate(schemaLoginUser, req.body, next);
+// };

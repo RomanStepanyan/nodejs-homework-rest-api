@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const validate = require("./validation.js");
 
-// const { Contacts } = require("../../db/contactsModel");
+const { authMiddleware } = require("../../middlewares/authMiddleware");
 
 const {
   listContacts,
@@ -13,9 +13,13 @@ const {
   updateStatusContact,
 } = require("../../model/index");
 
+router.use(authMiddleware);
+
 router.get("/", async (req, res, next) => {
+  const { _id } = req.user;
+  console.log(req.user);
   try {
-    const data = await listContacts();
+    const data = await listContacts(_id);
     res.status(200);
     res.json({ data });
   } catch (error) {
@@ -24,8 +28,13 @@ router.get("/", async (req, res, next) => {
 });
 
 router.get("/:contactId", async (req, res, next) => {
+  const { _id } = req.user;
   try {
+    // if (!_id) {
+    //   return res.status(401).json({ message: "Not authorized" });
+    // }
     const data = await getContactById(req.params.contactId);
+    console.log("Should be a full information contactById", data);
     if (!data) {
       res.status(404);
       res.json({
@@ -40,8 +49,9 @@ router.get("/:contactId", async (req, res, next) => {
 });
 
 router.post("/", validate.createContact, async (req, res, next) => {
+  const { _id } = req.user;
   try {
-    const newContact = await addContact(req.body);
+    const newContact = await addContact(_id, req.body);
     res.status(201);
     res.json({ "contact added": newContact });
   } catch (error) {
@@ -50,7 +60,11 @@ router.post("/", validate.createContact, async (req, res, next) => {
 });
 
 router.delete("/:contactId", async (req, res, next) => {
+  const { _id } = req.user;
   try {
+    // if (!_id) {
+    //   return res.status(401).json({ message: "Not authorized" });
+    // }
     const removedContact = await removeContact(req.params.contactId);
     if (!removedContact) {
       res.status(404);
@@ -66,7 +80,11 @@ router.delete("/:contactId", async (req, res, next) => {
 });
 
 router.patch("/:contactId", validate.updateContact, async (req, res, next) => {
+  const { _id } = req.user;
   try {
+    // if (!_id) {
+    //   return res.status(401).json({ message: "Not authorized" });
+    // }
     const data = await updateContact(req.params.contactId, req.body);
     if (!data) {
       res.status(404);
@@ -85,7 +103,11 @@ router.patch(
   "/:contactId/favorite",
   validate.updateContactStatus,
   async (req, res, next) => {
+    const { _id } = req.user;
     try {
+      // if (!_id) {
+      //   return res.status(401).json({ message: "Not authorized" });
+      // }
       const data = await updateStatusContact(req.params.contactId, req.body);
       if (!data) {
         res.status(400);
