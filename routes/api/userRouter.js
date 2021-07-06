@@ -1,48 +1,26 @@
-// const express = require("express");
-// const router = express.Router();
-// const validate = require("./validation.js");
+const express = require("express");
 
-// const { userSignup, userLogin, userLogout } = require("../../model/userAuth");
+const router = express.Router();
 
-// router.post("/signup", validate.user, async (req, res, next) => {
-//   const { email, password } = req.body;
-//   try {
-//     const newUser = await userSignup(email, password);
-//     if (!newUser) {
-//       res.status(400);
-//       res.json({
-//         message: `Signup is failed, check your email or password`,
-//       });
-//     }
-//     res.status(201);
-//     res.json({ newUser });
-//   } catch (error) {
-//     next(error);
-//   }
-// });
+const { asyncWrapper } = require("../../helpers/apiHelpers");
+const { authMiddleware } = require("../../middlewares/authMiddleware");
 
-// router.post("/login", validate.user, async (req, res, next) => {
-//   const { email, password } = req.body;
-//   try {
-//     const token = await userLogin(email, password);
-//     res.status(201);
-//     res.json({ "User logged in": token });
-//   } catch (error) {
-//     next(error);
-//   }
-// });
+const { userDataValidation } = require("../../middlewares/userValidation");
 
-// router.post("/logout", async (req, res, next) => {
-//   const { _id, token } = req.user;
-//   console.log("id from logout :", _id);
-//   console.log("token from logout :", token);
-//   try {
-//     await userLogout(_id, null);
-//     res.status(201);
-//     res.json({ "User logged in": token });
-//   } catch (error) {
-//     next(error);
-//   }
-// });
+const UserControllers = require("../../controllers/userControllers");
 
-// module.exports = router;
+router.post(
+  "/signup",
+  userDataValidation,
+  asyncWrapper(UserControllers.registration)
+);
+
+router.post("/login", userDataValidation, asyncWrapper(UserControllers.login));
+router.post("/logout", authMiddleware, asyncWrapper(UserControllers.logout));
+router.post(
+  "/current",
+  authMiddleware,
+  asyncWrapper(UserControllers.receiveCurrentUser)
+);
+
+module.exports = router;

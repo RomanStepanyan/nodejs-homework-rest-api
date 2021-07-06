@@ -1,8 +1,9 @@
 const mongoose = require("mongoose");
-const bсrypt = require("bcryptjs");
-const { Schema, model } = mongoose;
 
-const user = new Schema({
+const Schema = mongoose.Schema;
+const bcrypt = require("bcryptjs");
+
+const usersSchema = new Schema({
   password: {
     type: String,
     required: [true, "Password is required"],
@@ -23,19 +24,16 @@ const user = new Schema({
   },
 });
 
-user.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-  this.password = await bсrypt.hash(this.password, bсrypt.genSaltSync(8));
-  next();
+usersSchema.pre("save", async function () {
+  if (this.isNew) {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
 });
+const UsersModel = mongoose.model("User", usersSchema);
 
-user.methods.validPassword = async function (password) {
-  return await bсrypt.compare(password, this.password);
+module.exports = {
+  UsersModel,
 };
-
-const Users = model("user", user);
-
-module.exports = Users;
 
 // const mongoose = require("mongoose");
 // const bcrypt = require("bcrypt");

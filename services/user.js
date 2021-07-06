@@ -1,25 +1,52 @@
-const Users = require("../db/userModel");
+// authService.js
 
-const getUserById = (id) => {
-  return Users.findById(id);
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
+const { UsersModel } = require("../db/usersModel");
+const {
+  RegistrationConflictError,
+  UnauthorizeError,
+} = require("../helpers/errors");
+
+const createUser = async (email, password) => {
+  const existEmail = await UsersModel.findOne({ email });
+  if (existEmail) {
+    throw new RegistrationConflictError("Email in use");
+  }
+
+  const user = new UsersModel({
+    email,
+    password,
+  });
+  return await user.save();
 };
 
-const getUserByEmail = async (email) => {
-  return await Users.findOne({ email });
+const loginUser = async (email, password) => {
+  const user = await UsersModel.findOne({ email });
+
+  if (!user) {
+    throw new UnauthorizeError("User email is wrong");
+  }
+  const userCheck = await bcrypt.compare(password, user.password);
+  if (!userCheck) {
+    throw new UnauthorizeError("User password is wrong");
+  }
+
+  const token = jwt.sign(
+    {
+      _id: user._id,
+      email: user.email,
+      subscription: user.subscription,
+    },
+    process.env.JWT_SECRET
+  );
+
+  return { user, token };
 };
 
-const addUser = async (body) => {
-  const user = await Users(body);
-  return user.save();
+const findUser = async (id) => {
+  return await UsersModel.findById(id);
 };
 
-const updateToken = (id, token) => {
-  Users.updateOne({ _id: id }, { token });
-};
-
-module.exports = {
-  getUserById,
-  getUserByEmail,
-  addUser,
-  updateToken,
-};
+module.exports = { createUser, loginUser, findUser };
