@@ -2,13 +2,14 @@ const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
 require("dotenv").config();
-// const app = require("../app");
+
 const PORT = process.env.PORT || 3030;
 
 const app = express();
 const formatsLogger = app.get("env") === "development" ? "dev" : "short";
 
-const contactsRouter = require("../routes/api/contacts");
+const contactsRouter = require("../routes/api/contactRouter");
+const userRouter = require("../routes/api/userRouter");
 const { connectMongo } = require("../db/connections");
 // const { errorHandler } = require("./src/helpers/apiHelpers");
 
@@ -16,7 +17,7 @@ app.use(logger(formatsLogger));
 app.use(cors());
 app.use(express.json());
 app.use("/api/contacts", contactsRouter);
-// app.use(errorHandler);
+app.use("/api/users", userRouter);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Not found" });

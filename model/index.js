@@ -1,13 +1,14 @@
 const { Contacts } = require("../db/contactsModel");
 
-const listContacts = async () => {
+const listContacts = async (userId) => {
   try {
-    const contacts = await Contacts.find();
+    const contacts = await Contacts.find({ owner: userId });
     return contacts;
   } catch (error) {}
 };
 
 const getContactById = async (contactId) => {
+  // const userId  = { owner: userId }
   try {
     const contactById = await Contacts.findById(contactId);
     return contactById;
@@ -21,10 +22,12 @@ const removeContact = async (contactId) => {
   } catch (error) {}
 };
 
-const addContact = async (body) => {
-  const { name, email, phone } = body;
+const addContact = async (userId, body) => {
+  console.log("what is user -", userId);
+  // const { name, email, phone } = body;
   try {
-    const newContact = new Contacts({ name, email, phone });
+    // const newContact = new Contacts({ name, email, phone }, userId);
+    const newContact = new Contacts({ owner: userId, ...body });
     await newContact.save();
     return newContact;
   } catch (error) {}
