@@ -1,5 +1,3 @@
-// contactValidationMiddleware.js
-
 const Joi = require("joi");
 
 const { ValidationError } = require("../helpers/errors");
@@ -15,7 +13,6 @@ const postValidation = (req, res, next) => {
       .required(),
     phone: Joi.string()
       .max(12)
-      // eslint-disable-next-line
       .pattern(/^\d[\d\(\)\ -]{4,14}\d$/)
       .required(),
     favorite: Joi.boolean(),
