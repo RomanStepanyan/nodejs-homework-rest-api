@@ -1,5 +1,3 @@
-// authService.js
-
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -49,4 +47,8 @@ const findUser = async (id) => {
   return await UsersModel.findById(id);
 };
 
-module.exports = { createUser, loginUser, findUser };
+const updateAvatar = async (id, avatarURL) => {
+  return await UsersModel.updateOne({ _id: id }, { avatarURL });
+};
+
+module.exports = { createUser, loginUser, findUser, updateAvatar };
