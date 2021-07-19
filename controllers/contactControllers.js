@@ -53,14 +53,12 @@ const patchContact = async (req, res) => {
 
 const patchContactStatus = async (req, res) => {
   const { _id } = req.user;
-
   const { contactId } = req.params;
   const { favorite } = req.body;
 
   if (!favorite) {
     return res.status(400).json({ message: "missing field favorite" });
   }
-
   const updatedContact = await updateStatusContact(contactId, req.body, _id);
 
   if (!updatedContact) {

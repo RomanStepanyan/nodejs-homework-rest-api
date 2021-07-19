@@ -29,4 +29,9 @@ router.patch(
   uploadMiddleware.single("avatar"),
   asyncWrapper(UserControllers.changeAvatar)
 );
+router.get(
+  "/verify/:verifyToken",
+  asyncWrapper(UserControllers.verificationByToken)
+);
+router.post("/verify", asyncWrapper(UserControllers.reVerificationMailSending));
 module.exports = router;
