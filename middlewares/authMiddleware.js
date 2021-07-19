@@ -6,7 +6,6 @@ const { UnauthorizeError } = require("../helpers/errors");
 const authMiddleware = async (req, res, next) => {
   try {
     const [, token] = req.headers.authorization.split(" ");
-
     if (!token) {
       next(new UnauthorizeError("Not authorized"));
     }
@@ -14,18 +13,14 @@ const authMiddleware = async (req, res, next) => {
     const user = jwt.decode(token, process.env.JWT_SECRET);
     const { _id } = user;
     const checkUser = await findUser(_id);
-
-    if (!checkUser) {
+    if (!checkUser || checkUser.token === null) {
       next(new UnauthorizeError("User doesn't exist"));
     }
-    checkUser.token = token;
-    await checkUser.save();
 
-    req.user = await checkUser;
-
+    req.user = checkUser;
     next();
   } catch (err) {
-    next(new UnauthorizeError("Not authorized"));
+    next(new UnauthorizeError("Some problems!!!"));
   }
 };
 
